@@ -1,3 +1,4 @@
+// server initialization
 const port = 7000;
 const host = 'localhost';
 
@@ -16,21 +17,21 @@ app.listen(port, host, function (){
 })
 
 
+// files initialization
+let jsObjectSkills = JSON.parse(fs.readFileSync('skills.json', 'utf8').toString())
+let jsObjectStat = JSON.parse(fs.readFileSync('stat.json', 'utf8').toString())
 
-let file = fs.readFileSync('skills.json', 'utf8').toString();
-let jsObjectSkills = JSON.parse(file);
 
-let file1 = fs.readFileSync('stat.json', 'utf8').toString()
-let jsObjectStat = JSON.parse(file1)
-
+// saving user choice
 app.post('/add', urlencodeParser, function(req, res) {
-    if(!req.body) return res.sendStatus(400);
-    // console.log(req.body);
-    let data = fs.readFileSync('stat.json', 'utf8').toString();
-    let skillsList = JSON.parse(data);
+    if(!req.body) return res.sendStatus(400)
+    // console.log(req.body)
+    let data = fs.readFileSync('stat.json', 'utf8').toString()
+    let skillsList = JSON.parse(data)
 
     let count = 0;
-    console.log(skillsList)
+    // console.log(skillsList)
+
     for (i in req.body) {
         if (i === 'specialist_f') {
             count = 2
@@ -42,7 +43,7 @@ app.post('/add', urlencodeParser, function(req, res) {
             count = 1
         }
 
-        console.log(i);
+        // console.log(i);
 
         if (i.startsWith('f')) {
             skillsList['frontend'][jsObjectSkills[i.slice(1)]] += count
@@ -54,15 +55,41 @@ app.post('/add', urlencodeParser, function(req, res) {
 
     }
 
+    // writing statistics to the file
     fs.writeFileSync('stat.json', JSON.stringify(skillsList), function(error) {
-        if(error) throw error;
-        console.log("Асинхронная запись файла завершена.");
-    });
-    res.render('lab_1');
-});
+        if(error) throw error
+        console.log("Асинхронная запись файла завершена.")
+    })
+    res.render('lab_1')
+})
+
+// result keepers
+let frontEnd = []
+let dataScience = []
+let sysAdmin = []
 
 
+// fill result lists
+for (let profession in jsObjectStat) {
+    for (let skill in jsObjectStat[profession]) {
+        if (profession === "frontend") {
+            frontEnd.push([skill, jsObjectStat[profession][skill]]);
+        } else if (profession === "data_scientist") {
+            dataScience.push([skill, jsObjectStat[profession][skill]]);
+        } else if (profession === "sysadmin") {
+            sysAdmin.push([skill, jsObjectStat[profession][skill]]);
+        }
+    }
+}
 
+
+// sort lists by values
+dataScience.sort((a, b) => a[1] - b[1]).reverse()
+frontEnd.sort((a, b) => a[1] - b[1]).reverse()
+sysAdmin.sort((a, b) => a[1] - b[1]).reverse()
+
+
+// building web page
 app.get('/', function (req, res) {
     res.render('main');
 });
@@ -80,7 +107,7 @@ app.get('/:name', function(req, res) {
     } else if(req.params.name === 'sysadmin') {
         res.render('sysadmin');
     } else if(req.params.name === 'stat') {
-        res.render('stat', {skillName: jsObjectSkills, skillStat: jsObjectStat});
+        res.render('stat', {dataScience: dataScience, frontEnd: frontEnd, sysAdmin: sysAdmin});
     }  else {
         res.sendFile(__dirname + '/404.html');
     }

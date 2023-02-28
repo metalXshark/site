@@ -27,8 +27,8 @@
                         <% for(let i=0; i<5; i++) { %>
                             <tr>
                                 <td><%= (i+1) %></td>
-                                <td class="td_1"><%= skillName[i.toString()] %></td>
-                                <td><%= skillStat["frontend"][skillName[i.toString()]] %></td>
+                                <td class="td_1"><%= frontEnd[i][0] %></td>
+                                <td><%= frontEnd[i][1] %></td>
                             </tr>
                         <% } %>
                     </table>
@@ -44,8 +44,8 @@
                         <% for(let i=0; i<5; i++) { %>
                             <tr>
                                 <td><%= (i+1) %></td>
-                                <td class="td_1"><%= skillName[i.toString()] %></td>
-                                <td><%= skillStat["data_scientist"][skillName[i.toString()]] %></td>
+                                <td class="td_1"><%= dataScience[i][0] %></td>
+                                <td><%= dataScience[i][1] %></td>
                             </tr>
                         <% } %>
                     </table>
@@ -63,8 +63,8 @@
                         <% for(let i=0; i<5; i++) { %>
                             <tr>
                                 <td><%= (i+1) %></td>
-                                <td class="td_1"><%= skillName[i.toString()] %></td>
-                                <td><%= skillStat["sysadmin"][skillName[i.toString()]] %></td>
+                                <td class="td_1"><%= sysAdmin[i][0] %></td>
+                                <td><%= sysAdmin[i][1] %></td>
                             </tr>
                         <% } %>
                     </table>
