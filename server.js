@@ -22,15 +22,19 @@ let jsObjectSkills = JSON.parse(fs.readFileSync('skills.json', 'utf8').toString(
 let jsObjectStat = JSON.parse(fs.readFileSync('stat.json', 'utf8').toString())
 
 
+// user id (fills after registration / authorisation)
+let id
+
+
 // saving user choice
 app.post('/add', urlencodeParser, function(req, res) {
     if(!req.body) return res.sendStatus(400)
-    // console.log(req.body)
-    let data = fs.readFileSync('stat.json', 'utf8').toString()
-    let skillsList = JSON.parse(data)
+    // general stat file init
+    let skillsList = JSON.parse(fs.readFileSync('stat.json', 'utf8').toString())
+    // user stat file init
+    let userSkillsList = JSON.parse(fs.readFileSync(`users/u${id}.json`, 'utf8').toString())
 
     let count = 0;
-    // console.log(skillsList)
 
     for (i in req.body) {
         if (i === 'specialist_f') {
@@ -43,14 +47,15 @@ app.post('/add', urlencodeParser, function(req, res) {
             count = 1
         }
 
-        // console.log(i);
-
         if (i.startsWith('f')) {
             skillsList['frontend'][jsObjectSkills[i.slice(1)]] += count
+            userSkillsList['frontend'][jsObjectSkills[i.slice(1)]] += 1
         } else if (i.startsWith('a')) {
             skillsList['sysadmin'][jsObjectSkills[i.slice(1)]] += count
+            userSkillsList['sysadmin'][jsObjectSkills[i.slice(1)]] += 1
         } else if (i.startsWith('d')){
             skillsList['data_scientist'][jsObjectSkills[i.slice(1)]] += count
+            userSkillsList['data_scientist'][jsObjectSkills[i.slice(1)]] += 1
         }
 
     }
@@ -63,13 +68,14 @@ app.post('/add', urlencodeParser, function(req, res) {
     res.render('lab_1')
 })
 
-// result keepers
+
+// result keepers init
 let frontEnd = []
 let dataScience = []
 let sysAdmin = []
 
 
-// fill result lists
+// filling result lists
 for (let profession in jsObjectStat) {
     for (let skill in jsObjectStat[profession]) {
         if (profession === "frontend") {
@@ -83,16 +89,55 @@ for (let profession in jsObjectStat) {
 }
 
 
-// sort lists by values
+// sorting lists by values
 dataScience.sort((a, b) => a[1] - b[1]).reverse()
 frontEnd.sort((a, b) => a[1] - b[1]).reverse()
 sysAdmin.sort((a, b) => a[1] - b[1]).reverse()
 
 
-// building web page
+// user authorisation
+app.get('/authorisation', async function(req, res) {
+    const { name } = req.query;
+    const { password } = req.query;
+
+    let usersData = JSON.parse(fs.readFileSync(`usersData.json`, 'utf8').toString())
+    let flag = false
+
+    usersData.forEach( (a) => {if (a[0] === name) {flag = true; id = a}})
+
+    if (flag && (password === usersData[id][1])) {
+        alert(`Здравствуйте, ${name}`)
+    } else {
+        alert("Неверный пароль")
+    }
+})
+
+
+// user registration
+app.get('/registration', async function(req, res) {
+    const { name } = req.query;
+    const { password } = req.query;
+    let id = Date.now().toString()
+    let usersData = JSON.parse(fs.readFileSync(`usersData.json`, 'utf8').toString())
+    usersData[id] = [name, password]
+
+    fs.writeFileSync('userData.json', JSON.stringify(usersData), function(error) {
+        if(error) throw error
+        console.log(`User ${name} with id = ${id} registered successfully`)
+    })
+
+    let blankStat = fs.readFileSync(`users/blankUser.json`, 'utf8').toString()
+    blankStat.pipe(`users/u${id}`)
+})
+
+
+// load main page
 app.get('/', function (req, res) {
     res.render('main');
 });
+
+
+// switching pages
 app.get('/:name', function(req, res) {
     if(req.params.name === 'main') {
         res.render('main');
