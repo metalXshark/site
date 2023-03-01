@@ -23,7 +23,7 @@ let jsObjectStat = JSON.parse(fs.readFileSync('stat.json', 'utf8').toString())
 
 
 // user id (fills after registration / authorisation)
-let id
+
 
 
 // saving user choice
@@ -110,25 +110,40 @@ app.get('/authorisation', async function(req, res) {
     } else {
         alert("Неверный пароль")
     }
+    res.render('main')
 })
 
 
 // user registration
-app.get('/registration', async function(req, res) {
-    const { name } = req.query;
-    const { password } = req.query;
+app.post('/registration', urlencodeParser, function(req, res) {
+    if(!req.body) return res.sendStatus(400);
+    console.log(req.body);
     let id = Date.now().toString()
-    let usersData = JSON.parse(fs.readFileSync(`usersData.json`, 'utf8').toString())
-    usersData[id] = [name, password]
-
-    fs.writeFileSync('userData.json', JSON.stringify(usersData), function(error) {
-        if(error) throw error
-        console.log(`User ${name} with id = ${id} registered successfully`)
-    })
-
+    let user = {"id": id}
+    let jsonData = fs.readFileSync('usersData.json' , 'utf8');
+    let all = jsonData.substring(0, jsonData.length-1) + ', ' + JSON.stringify(user) + "]";
+    fs.writeFileSync('usersData.json', all, function(error) {
+        if(error) throw error;
+        console.log(`User ${name} with id = ${id} registered successfully`);
+    });
+    let userData = fs.readFileSync('usersData.json' , 'utf8');
+    let gift = userData.substring(0, userData.length-2) + ', ' + JSON.stringify(req.body).replace("{","") + "]";
+    fs.writeFileSync('usersData.json', gift, function(error) {
+        if(error) throw error;
+        console.log(`User ${name} with id = ${id} registered successfully`);
+    });
     let blankStat = fs.readFileSync(`users/blankUser.json`, 'utf8').toString()
-    blankStat.pipe(`users/u${id}`)
-})
+    let blankUser = blankStat;
+    fs.writeFileSync(`users/u${id}.json`, blankUser, function(error) {
+        if(error) throw error;
+        console.log(`User ${name} with id = ${id} registered successfully`);
+    });
+    res.render('main');
+});
+// user login
+app.post('/login', urlencodeParser, function(req, res) {
+
+});
 
 
 // load main page
@@ -151,6 +166,10 @@ app.get('/:name', function(req, res) {
         res.render('data');
     } else if(req.params.name === 'sysadmin') {
         res.render('sysadmin');
+    } else if(req.params.name === 'login') {
+        res.render('login');
+    } else if(req.params.name === 'reg') {
+        res.render('reg');
     } else if(req.params.name === 'stat') {
         res.render('stat', {dataScience: dataScience, frontEnd: frontEnd, sysAdmin: sysAdmin});
     }  else {
