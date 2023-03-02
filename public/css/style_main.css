@@ -49,14 +49,15 @@ a, u {
 .boxes {
     display: flex;
     height: 1000px;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 .box {
     display: block;
     position: relative;
-    margin-top: 40px;
+    margin: 40px;
     width: 320px;
     height: 420px;
-    margin-left: 40px;
     z-index: 1;
 }
 .box::before {
