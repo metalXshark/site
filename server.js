@@ -102,8 +102,13 @@ app.get('/authorisation', async function(req, res) {
 
     let usersData = JSON.parse(fs.readFileSync(`usersData.json`, 'utf8').toString())
     let flag = false
+    let id;
 
-    usersData.forEach( (a) => {if (a[0] === name) {flag = true; id = a}})
+    usersData.forEach( (a) => {
+        if (a[0] === name) {
+            flag = true;
+            id = a
+        }})
 
     if (flag && (password === usersData[id][1])) {
         alert(`Здравствуйте, ${name}`)
@@ -132,8 +137,7 @@ app.post('/registration', urlencodeParser, function(req, res) {
         if(error) throw error;
         console.log(`User ${name} with id = ${id} registered successfully`);
     });
-    let blankStat = fs.readFileSync(`users/blankUser.json`, 'utf8').toString()
-    let blankUser = blankStat;
+    let blankUser = fs.readFileSync(`users/blankUser.json`, 'utf8').toString();
     fs.writeFileSync(`users/u${id}.json`, blankUser, function(error) {
         if(error) throw error;
         console.log(`User ${name} with id = ${id} registered successfully`);
@@ -170,9 +174,17 @@ app.get('/:name', function(req, res) {
         res.render('login');
     } else if(req.params.name === 'reg') {
         res.render('reg');
+    } else if(req.params.name === 'easy_aud_test') {
+        res.render('easy_aud_test');
+    } else if(req.params.name === 'easy_eye_test') {
+        res.render('easy_eye_test');
+    } else if(req.params.name === 'hard_aud_test') {
+        res.render('hard_aud_test');
+    } else if(req.params.name === 'hard_eye_test') {
+        res.render('hard_eye_test');
     } else if(req.params.name === 'stat') {
         res.render('stat', {dataScience: dataScience, frontEnd: frontEnd, sysAdmin: sysAdmin});
-    }  else {
+    } else {
         res.sendFile(__dirname + '/404.html');
     }
 });
